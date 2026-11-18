@@ -75,3 +75,25 @@ export function Lantern({ level = 0, size = 44, id = 'l' }) {
     </svg>
   );
 }
+
+/** Bridge plank with a glow level 0..1 (mastery meter of the bridge stage). */
+export function Plank({ level = 0, size = 44, id = 'p' }) {
+  const lit = Math.max(0, Math.min(1, level));
+  return (
+    <svg viewBox="0 0 64 44" width={size * 1.45} height={size} aria-hidden>
+      <defs>
+        <linearGradient id={`pg${id}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ffe28a" /><stop offset="1" stopColor="#f2a93b" />
+        </linearGradient>
+      </defs>
+      {lit > 0.7 && <ellipse cx="32" cy="22" rx="31" ry="20" fill="#ffe28a" opacity="0.25" />}
+      <rect x="3" y="9" width="58" height="26" rx="6" fill="#4a3a7a" stroke="#6a4a2a" strokeWidth="2.5" />
+      <rect x="5.5" y="11.5" width="53" height="21" rx="4" fill={`url(#pg${id})`} opacity={0.14 + 0.86 * lit} />
+      <path d="M12 18h40M12 26h40" stroke="#6a4a2a" strokeWidth="1.6" strokeLinecap="round" opacity="0.35" />
+      <circle cx="10" cy="22" r="2" fill="#6a4a2a" /><circle cx="54" cy="22" r="2" fill="#6a4a2a" />
+    </svg>
+  );
+}
+
+/** The mastery meter icon of a stage definition. */
+export const Meter = ({ kind, ...p }) => (kind === 'plank' ? <Plank {...p} /> : <Lantern {...p} />);

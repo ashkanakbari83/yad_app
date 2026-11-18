@@ -3,15 +3,18 @@ import Avatar, { Firefly } from '../components/Avatar.jsx';
 import Scene from '../components/Scene.jsx';
 import ItemView from '../components/ItemViews.jsx';
 import { LEARN_SCENES } from '../components/Learn.jsx';
-import { Close, Lantern, Star, Medal } from '../components/Icons.jsx';
+import { BRIDGE_SCENES } from '../components/LearnBridge.jsx';
+import { Close, Meter, Star, Medal } from '../components/Icons.jsx';
 import { CoinChip, Num } from '../components/ui.jsx';
-import { SKILLS, SKILL_META, checkItem } from '../engine/items.js';
+import { stageDef } from '../stages/defs.js';
 import { isDone, newSession, nextItem, record, summary, target } from '../engine/session.js';
-import { faText } from '../lib/fa.js';
+import { rich } from '../components/rich.jsx';
 import { useGame } from '../lib/game.jsx';
 import { mulberry32 } from '../lib/rng.js';
 import { MEDALS } from '../lib/store.js';
 import CardsGame from './CardsGame.jsx';
+
+const SCENES = { 'ch3-1': LEARN_SCENES, 'ch3-2': BRIDGE_SCENES };
 
 const PRAISE = ['آفرین!', 'عالی بود!', 'دقیقاً همین!', 'درست گفتی!', 'چه دقیق!', 'خیلی خوب!'];
 const PRAISE_RECOVER = ['دیدی؟ با دقت درست شد!', 'پشتکار داری! این بار درست شد.', 'عالی! اشتباه، راه یاد گرفتن است.'];
@@ -41,23 +44,23 @@ function Bottom({ mood, say, tone, action }) {
 }
 
 /* ---------- intro ---------- */
-function Intro({ learned, onLearn, onPractice, onClose }) {
+function Intro({ def, learned, onLearn, onPractice, onClose }) {
   const { state } = useGame();
   return (
     <div className="screen" data-world="ch3">
       <div className="world-bg"><Scene world="ch3" /></div>
-      <TopBar title="فانوس‌های ممیز" onClose={onClose} />
+      <TopBar title={def.title} onClose={onClose} />
       <div className="intro-body layer">
         <div className="card story">
           <div className="story-top">
             <Firefly size={84} />
             <p className="txt" style={{ fontSize: 22 }}>
-              سلام {state.profile?.name}! من «ممیزک» هستم، نگهبان جنگل ممیز. فانوس‌های جنگل خاموش شده‌اند! با تمرین، هر ۴ فانوس را روشن کن تا جنگل دوباره بدرخشد.
+              {def.story(state.profile?.name)}
             </p>
           </div>
           <div className="lantern-row">
-            {SKILLS.map((s, i) => (
-              <div key={s} className="lanternbox"><Lantern id={`i${i}`} level={0} size={46} /><span>{SKILL_META[s].fa}</span></div>
+            {def.skills.map((s, i) => (
+              <div key={s} className="lanternbox"><Meter kind={def.meter} id={`i${i}`} level={0} size={46} /><span>{def.meta[s].fa}</span></div>
             ))}
           </div>
           <div className="story-actions">
@@ -71,22 +74,23 @@ function Intro({ learned, onLearn, onPractice, onClose }) {
 }
 
 /* ---------- learning scenes ---------- */
-function Learn({ onDone, onClose }) {
+function Learn({ def, onDone, onClose }) {
+  const scenes = SCENES[def.id];
   const [i, setI] = useState(0);
   const [say, setSay] = useState('');
   const [ready, setReady] = useState(false);
-  const scene = LEARN_SCENES[i];
+  const scene = scenes[i];
   const Comp = scene.Comp;
-  const last = i === LEARN_SCENES.length - 1;
+  const last = i === scenes.length - 1;
   const stableSay = useCallback((t) => setSay(t), []);
   const stableReady = useCallback((v) => setReady(v), []);
   return (
     <div className="screen" data-world="ch3">
       <div className="world-bg"><Scene world="ch3" dim /></div>
-      <TopBar title={<>آموزش <Num v={i + 1} /> از <Num v={LEARN_SCENES.length} /> · {scene.title}</>} onClose={onClose} />
+      <TopBar title={<>آموزش <Num v={i + 1} /> از <Num v={scenes.length} /> · {scene.title}</>} onClose={onClose} />
       <div className="stage-card card layer"><Comp key={scene.id} setSay={stableSay} setReady={stableReady} /></div>
       <Bottom
-        mood={ready ? 'happy' : 'idle'} say={say} tone={ready ? 'good' : ''}
+        mood={ready ? 'happy' : 'idle'} say={rich(say)} tone={ready ? 'good' : ''}
         action={<button className="btn btn-green btn-lg" disabled={!ready} onClick={() => { if (last) onDone(); else { setI(i + 1); setReady(false); setSay(''); } }}>{last ? 'شروع تمرین' : 'ادامه'}</button>}
       />
     </div>
@@ -94,12 +98,12 @@ function Learn({ onDone, onClose }) {
 }
 
 /* ---------- adaptive practice ---------- */
-function Practice({ stageId, onFinish, onClose }) {
+function Practice({ def, stageId, onFinish, onClose }) {
   const { state, dispatch } = useGame();
   const sess = useRef(null);
   const rng = useRef(null);
   if (!sess.current) {
-    sess.current = newSession(state.stages[stageId]?.mastery || {});
+    sess.current = newSession(def, state.stages[stageId]?.mastery || {});
     rng.current = mulberry32((Date.now() ^ 0x9e3779b9) >>> 0);
   }
   const stats = useRef({ xp: 0, coins: 0, ok: 0 });
@@ -126,7 +130,7 @@ function Practice({ stageId, onFinish, onClose }) {
   const reward = (xp, coins) => { stats.current.xp += xp; stats.current.coins += coins; dispatch({ type: 'reward', xp, coins }); };
 
   const check = () => {
-    const r = checkItem(item, answer);
+    const r = def.checkItem(item, answer);
     if (r.ok) {
       record(s, item, attempt === 0 ? 1 : 0.6);
       reward(attempt === 0 ? 8 : 7, 2);
@@ -137,12 +141,12 @@ function Practice({ stageId, onFinish, onClose }) {
       setMood('happy'); setResolved(true);
     } else if (attempt === 0) {
       setAttempt(1); setHint(true); setMood('oops');
-      setFb({ tone: 'warn', text: <><b>{faText(r.message)}</b><br />{faText(item.hint)}</> });
+      setFb({ tone: 'warn', text: <><b>{rich(r.message)}</b><br />{rich(item.hint)}</> });
     } else {
       record(s, item, 0);
       reward(2, 0);
       setReveal(true); setResolved(true); setMood('think');
-      setFb({ tone: 'warn', text: <><b>با هم حل کنیم:</b> {faText(item.explain)}</> });
+      setFb({ tone: 'warn', text: <><b>با هم حل کنیم:</b> {rich(item.explain)}</> });
     }
     bump();
   };
@@ -164,7 +168,7 @@ function Practice({ stageId, onFinish, onClose }) {
           {Array.from({ length: total }, (_, i) => <i key={i} className={i < done ? 'on' : i === done ? 'now' : ''} />)}
         </div>
         <div className="lanterns" aria-label="فانوس‌ها">
-          {SKILLS.map((k, i) => <span key={k} title={SKILL_META[k].fa}><Lantern id={`p${i}`} level={s.skills[k].m} size={30} /></span>)}
+          {def.skills.map((k, i) => <span key={k} title={def.meta[k].fa}><Meter kind={def.meter} id={`p${i}`} level={s.skills[k].m} size={30} /></span>)}
         </div>
       </TopBar>
       <div className="stage-card card layer">
@@ -180,12 +184,10 @@ function Practice({ stageId, onFinish, onClose }) {
 }
 
 /* ---------- result ---------- */
-function Result({ res, learnedCards, onCards, onReplay, onMap, onHome }) {
+function Result({ def, res, learnedCards, onCards, onReplay, onMap, onHome }) {
   const xp = res.stats.xp + res.bonusXp;
   const coins = res.stats.coins + res.bonusCoins;
-  const line = res.stars === 3 ? 'همه‌ی فانوس‌ها روشن شد! جنگل می‌درخشد.'
-    : res.stars === 2 ? 'فانوس‌ها تقریباً روشن شدند. یک دور دیگر کاملشان می‌کند.'
-      : 'شروع خوبی بود! با یک دور تمرین بیشتر فانوس‌ها روشن‌تر می‌شوند.';
+  const line = def.resultLine[res.stars - 1];
   const { state } = useGame();
   return (
     <div className="screen" data-world="ch3">
@@ -195,8 +197,8 @@ function Result({ res, learnedCards, onCards, onReplay, onMap, onHome }) {
           <div className="stars-row">{[1, 2, 3].map((i) => <span key={i} className="pop" style={{ animationDelay: `${i * 0.18}s` }}><Star on={i <= res.stars} width="84" height="84" /></span>)}</div>
           <h2 className="h2">{line}</h2>
           <div className="lantern-row">
-            {SKILLS.map((k, i) => (
-              <div key={k} className="lanternbox"><Lantern id={`r${i}`} level={res.mastery[k]} size={46} /><span>{SKILL_META[k].fa}</span></div>
+            {def.skills.map((k, i) => (
+              <div key={k} className="lanternbox"><Meter kind={def.meter} id={`r${i}`} level={res.mastery[k]} size={46} /><span>{def.meta[k].fa}</span></div>
             ))}
           </div>
           <div className="gains">
@@ -208,7 +210,7 @@ function Result({ res, learnedCards, onCards, onReplay, onMap, onHome }) {
             <div className="gains">{res.newMedals.map((m) => <span key={m} className="chip" style={{ background: '#fff3c4' }}><Medal width="22" height="28" /> {MEDALS[m].fa}</span>)}</div>
           )}
           <div className="ractions">
-            <button className="btn btn-yellow" onClick={onCards}>{learnedCards ? 'کارت‌ها: دوباره' : 'چالش ویژه: کارت‌های ممیز'}</button>
+            {def.hasCards && <button className="btn btn-yellow" onClick={onCards}>{learnedCards ? 'کارت‌ها: دوباره' : 'چالش ویژه: کارت‌های ممیز'}</button>}
             <button className="btn btn-purple" onClick={onReplay}>تمرین دوباره</button>
             <button className="btn btn-white" onClick={onMap}>نقشه</button>
             <button className="btn btn-green" onClick={onHome}>خانه</button>
@@ -222,6 +224,7 @@ function Result({ res, learnedCards, onCards, onReplay, onMap, onHome }) {
 
 export default function StageRunner({ stageId, onExit, onMap, onReplay, skipLearn, onPhase }) {
   const { state, dispatch } = useGame();
+  const def = stageDef(stageId);
   const saved = state.stages[stageId];
   const [phase, setPhase] = useState(skipLearn ? 'practice' : 'intro');
   const [res, setRes] = useState(null);
@@ -232,6 +235,7 @@ export default function StageRunner({ stageId, onExit, onMap, onReplay, skipLear
     if (sum.firstTry >= 8) earned.push('precise');
     if (sum.recovered >= 2) earned.push('persist');
     if (sum.stars === 3) earned.push('lantern');
+    earned.push(...def.extraMedals(sum));
     const bonusXp = 20;
     const bonusCoins = sum.stars * 8;
     dispatch({ type: 'stageDone', stageId, stars: sum.stars, mastery: sum.mastery, medals: earned });
@@ -249,11 +253,11 @@ export default function StageRunner({ stageId, onExit, onMap, onReplay, skipLear
   };
 
   switch (phase) {
-    case 'intro': return <Intro learned={!!saved?.learned} onLearn={() => setPhase('learn')} onPractice={() => setPhase('practice')} onClose={onExit} />;
-    case 'learn': return <Learn onDone={() => { dispatch({ type: 'learned', stageId }); setPhase('practice'); }} onClose={onExit} />;
-    case 'practice': return <Practice stageId={stageId} onFinish={finish} onClose={onExit} />;
+    case 'intro': return <Intro def={def} learned={!!saved?.learned} onLearn={() => setPhase('learn')} onPractice={() => setPhase('practice')} onClose={onExit} />;
+    case 'learn': return <Learn def={def} onDone={() => { dispatch({ type: 'learned', stageId }); setPhase('practice'); }} onClose={onExit} />;
+    case 'practice': return <Practice def={def} stageId={stageId} onFinish={finish} onClose={onExit} />;
     case 'cards': return <CardsGame onDone={cardsDone} onClose={() => setPhase('result')} />;
-    case 'result': return <Result res={res} learnedCards={!!saved?.cards || false} onCards={() => setPhase('cards')} onReplay={onReplay} onMap={onMap} onHome={onExit} />;
+    case 'result': return <Result def={def} res={res} learnedCards={!!saved?.cards || false} onCards={() => setPhase('cards')} onReplay={onReplay} onMap={onMap} onHome={onExit} />;
     default: return null;
   }
 }

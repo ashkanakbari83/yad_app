@@ -1,19 +1,17 @@
 // Adaptive practice loop for one stage. Pure + deterministic given an rng.
-import { SKILLS, makeItem } from './items.js';
 
 export const SESSION_LEN = 12;
 export const MAX_EXTRA = 3;
-export const WARMUP = ['placeValue', 'readModel', 'buildModel', 'zeroRule'];
 export const MASTERED = 0.75;
 
 // thresholds chosen so a perfect student sees level 1, 2, 3 of every skill within 3 items
 export const levelFor = (m) => (m < 0.3 ? 1 : m < 0.6 ? 2 : 3);
 
 /** prior = mastery from an earlier play (decays by half so a replay re-checks it). */
-export function newSession(prior = {}) {
+export function newSession(def, prior = {}) {
   const skills = {};
-  for (const s of SKILLS) skills[s] = { m: (prior[s] ?? 0) * 0.5, n: 0 };
-  return { skills, asked: 0, normal: 0, extra: 0, alt: null, recent: [], seen: new Set(), history: [] };
+  for (const s of def.skills) skills[s] = { m: (prior[s] ?? 0) * 0.5, n: 0 };
+  return { def, skills, asked: 0, normal: 0, extra: 0, alt: null, recent: [], seen: new Set(), history: [] };
 }
 
 export const target = (s) => SESSION_LEN + s.extra;
@@ -25,12 +23,12 @@ export function pickNext(s, rng) {
     s.alt = null;
     return { skill: a.skill, level: a.level, alt: true };
   }
-  if (s.normal < WARMUP.length) {
-    const skill = WARMUP[s.normal];
+  if (s.normal < s.def.warmup.length) {
+    const skill = s.def.warmup[s.normal];
     return { skill, level: levelFor(s.skills[skill].m), alt: false };
   }
   let best = null;
-  for (const skill of SKILLS) {
+  for (const skill of s.def.skills) {
     const need = 1 - s.skills[skill].m;
     const recentPenalty = s.recent.slice(-2).includes(skill) ? 0.18 : 0;
     const score = need - recentPenalty + rng() * 0.05;
@@ -41,7 +39,7 @@ export function pickNext(s, rng) {
 
 export function nextItem(s, rng) {
   const { skill, level, alt } = pickNext(s, rng);
-  const item = makeItem(skill, level, rng, s.seen);
+  const item = s.def.makeItem(skill, level, rng, s.seen);
   s.seen.add(item.key);
   s.recent.push(skill);
   return { ...item, alt };
@@ -63,10 +61,11 @@ export function record(s, item, score) {
 }
 
 export function summary(s) {
-  const ms = SKILLS.map((k) => s.skills[k].m);
+  const keys = s.def.skills;
+  const ms = keys.map((k) => s.skills[k].m);
   const avg = ms.reduce((a, b) => a + b, 0) / ms.length;
   const stars = avg >= 0.75 ? 3 : avg >= 0.5 ? 2 : 1;
-  const mastery = Object.fromEntries(SKILLS.map((k) => [k, Math.round(s.skills[k].m * 100) / 100]));
+  const mastery = Object.fromEntries(keys.map((k) => [k, Math.round(s.skills[k].m * 100) / 100]));
   const firstTry = s.history.filter((h) => h.score === 1).length;
   const recovered = s.history.filter((h) => h.score === 0.6).length;
   return { avg, stars, mastery, firstTry, recovered, total: s.history.length };

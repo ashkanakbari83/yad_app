@@ -4,6 +4,8 @@ import { useGame } from '../lib/game.jsx';
 export default function Settings({ onClose, onReset }) {
   const { state, dispatch } = useGame();
   const [confirm, setConfirm] = useState(false);
+  const installed = typeof matchMedia === 'function' && (matchMedia('(display-mode: fullscreen)').matches || matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
+  const canFs = !!document.documentElement.requestFullscreen;
   const fs = () => {
     try {
       if (document.fullscreenElement) document.exitFullscreen();
@@ -20,8 +22,13 @@ export default function Settings({ onClose, onReset }) {
             onClick={() => dispatch({ type: 'settings', patch: { reduceMotion: !state.settings.reduceMotion } })} />
         </div>
         <div className="row">
-          <div className="h3">تمام‌صفحه</div>
-          <button className="btn btn-purple btn-sm" onClick={fs}>روشن / خاموش</button>
+          <div>
+            <div className="h3">تمام‌صفحه</div>
+            {installed
+              ? <div className="muted" style={{ fontSize: 16 }}>به‌صورت برنامه نصب شده است</div>
+              : !canFs && <div className="muted" style={{ fontSize: 16 }}>در آیفون: دکمه‌ی اشتراک‌گذاری ← «افزودن به صفحه‌ی اصلی»</div>}
+          </div>
+          {canFs && !installed && <button className="btn btn-purple btn-sm" onClick={fs}>روشن / خاموش</button>}
         </div>
         <div className="row">
           <div><div className="h3">شروع دوباره</div><div className="muted" style={{ fontSize: 16 }}>همه‌ی پیشرفت این دستگاه پاک می‌شود</div></div>

@@ -1,0 +1,45 @@
+// Pure stage definitions (no JSX) so the engine and the tests can use them directly.
+import * as first from '../engine/items.js';
+import * as bridge from '../engine/bridge.js';
+
+const mastered = (min) => (sum) => Object.values(sum.mastery).every((m) => m >= min);
+
+export const STAGES = {
+  'ch3-1': {
+    id: 'ch3-1',
+    world: 'ch3',
+    title: 'فانوس‌های ممیز',
+    sub: 'ارزش مکانی و مدل اعداد اعشاری',
+    pages: '۴۴',
+    meter: 'lantern',
+    skills: first.SKILLS,
+    meta: first.SKILL_META,
+    warmup: ['placeValue', 'readModel', 'buildModel', 'zeroRule'],
+    makeItem: first.makeItem,
+    checkItem: first.checkItem,
+    hasCards: true,
+    story: (name) => `سلام ${name}! من «ممیزک» هستم، نگهبان جنگل ممیز. فانوس‌های جنگل خاموش شده‌اند! با تمرین، هر ۴ فانوس را روشن کن تا جنگل دوباره بدرخشد.`,
+    resultLine: ['شروع خوبی بود! با یک دور تمرین بیشتر فانوس‌ها روشن‌تر می‌شوند.', 'فانوس‌ها تقریباً روشن شدند. یک دور دیگر کاملشان می‌کند.', 'همه‌ی فانوس‌ها روشن شد! جنگل می‌درخشد.'],
+    extraMedals: () => [],
+  },
+  'ch3-2': {
+    id: 'ch3-2',
+    world: 'ch3',
+    title: 'پل کسر و اعشار',
+    sub: 'کسر، اعشار، شکل گسترده و جمع و تفریق',
+    pages: '۴۵–۴۶',
+    meter: 'plank',
+    skills: bridge.SKILLS,
+    meta: bridge.SKILL_META,
+    warmup: bridge.WARMUP,
+    makeItem: bridge.makeItem,
+    checkItem: bridge.checkItem,
+    hasCards: false,
+    story: (name) => `${name}، پل بین ساحل «کسرها» و ساحل «اعشارها» شکسته است! ممیزک می‌گوید هر تخته‌ی پل یک مهارت است. با تمرین، چهار تخته را محکم کن تا از پل رد شویم.`,
+    resultLine: ['شروع خوبی بود! با یک دور تمرین بیشتر تخته‌ها محکم‌تر می‌شوند.', 'پل تقریباً آماده است. یک دور دیگر کاملش می‌کند.', 'همه‌ی تخته‌ها محکم شد! پل آماده‌ی عبور است.'],
+    extraMedals: (sum) => (mastered(0.6)(sum) ? ['bridge'] : []),
+  },
+};
+
+export const stageDef = (id) => STAGES[id];
+export const STAGE_IDS = Object.keys(STAGES);

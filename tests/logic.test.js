@@ -8,6 +8,11 @@ import { mulberry32 } from '../src/lib/rng.js';
 import { SKILLS, makeItem, checkItem, cardsOptimum, cardsEvaluate } from '../src/engine/items.js';
 import { newSession, nextItem, record, isDone, summary, SESSION_LEN, MAX_EXTRA } from '../src/engine/session.js';
 import { levelInfo } from '../src/data/levels.js';
+import { STAGES } from '../src/stages/defs.js';
+import * as B from '../src/engine/bridge.js';
+
+const S1 = STAGES['ch3-1'];
+const S2 = STAGES['ch3-2'];
 
 test('Persian digits', () => {
   assert.equal(faDigits('68.19'), '۶۸.۱۹');
@@ -128,7 +133,7 @@ test('digit cards: nearest to 10 and 11 (book p.45)', () => {
 
 test('session: a perfect student finishes in exactly 12 items with 3 stars', () => {
   const rng = mulberry32(1);
-  const s = newSession();
+  const s = newSession(S1);
   const skillsSeen = [];
   while (!isDone(s)) {
     const it = nextItem(s, rng);
@@ -145,7 +150,7 @@ test('session: a perfect student finishes in exactly 12 items with 3 stars', () 
 
 test('session: a perfect student reaches level 3 of every skill; a struggling one stays easy', () => {
   const rng = mulberry32(2);
-  const s = newSession();
+  const s = newSession(S1);
   const maxLevel = {};
   while (!isDone(s)) {
     const it = nextItem(s, rng);
@@ -154,7 +159,7 @@ test('session: a perfect student reaches level 3 of every skill; a struggling on
   }
   for (const k of SKILLS) assert.equal(maxLevel[k], 3, `${k} should reach level 3`);
 
-  const t = newSession();
+  const t = newSession(S1);
   const tr = mulberry32(2);
   let hardOnes = 0;
   while (!isDone(t)) {
@@ -167,7 +172,7 @@ test('session: a perfect student reaches level 3 of every skill; a struggling on
 
 test('session: level rises with mastery and drops back via an easier alternative after a miss', () => {
   const rng = mulberry32(5);
-  const s = newSession();
+  const s = newSession(S1);
   const levels = { readModel: [] };
   let sawAlt = false;
   let n = 0;
@@ -187,7 +192,7 @@ test('session: level rises with mastery and drops back via an easier alternative
 
 test('session: extra items are capped and the child is never failed (>= 1 star)', () => {
   const rng = mulberry32(9);
-  const s = newSession();
+  const s = newSession(S1);
   while (!isDone(s)) record(s, nextItem(s, rng), 0);
   assert.equal(s.asked, SESSION_LEN + MAX_EXTRA);
   assert.equal(summary(s).stars, 1);
@@ -195,7 +200,7 @@ test('session: extra items are capped and the child is never failed (>= 1 star)'
 
 test('session: missing the easier alternative does not loop on the same skill', () => {
   const rng = mulberry32(4);
-  const s = newSession();
+  const s = newSession(S1);
   const skills = [];
   while (!isDone(s)) {
     const it = nextItem(s, rng);
@@ -209,7 +214,7 @@ test('session: missing the easier alternative does not loop on the same skill', 
 });
 
 test('session: a replay starts from half the earlier mastery', () => {
-  const s = newSession({ placeValue: 1, readModel: 0.8, buildModel: 0, zeroRule: 0.4 });
+  const s = newSession(S1, { placeValue: 1, readModel: 0.8, buildModel: 0, zeroRule: 0.4 });
   assert.equal(s.skills.placeValue.m, 0.5);
   assert.equal(s.skills.readModel.m, 0.4);
   assert.equal(s.skills.zeroRule.m, 0.2);
@@ -246,3 +251,113 @@ function wrongAnswer(it) {
     default: throw new Error(it.type);
   }
 }
+
+/* ---------------------------------------------------------------- stage 2: «پل کسر و اعشار» */
+test('bridge: decOfFrac is exact (book p.45 examples)', () => {
+  assert.equal(B.decOfFrac(3, 20), '0.15');
+  assert.equal(B.decOfFrac(107, 25), '4.28');
+  assert.equal(B.decOfFrac(84, 50), '1.68');
+  assert.equal(B.decOfFrac(8, 5), '1.6');
+  assert.equal(B.decOfFrac(237, 100), '2.37');
+  assert.equal(B.decOfFrac(45, 1000), '0.045');
+  assert.equal(B.decOfFrac(30, 100), '0.3');
+});
+
+test('bridge: every generated item is solvable by its own answer and never ambiguous', () => {
+  const rng = mulberry32(7);
+  for (const skill of B.SKILLS) for (const level of [1, 2, 3]) for (let i = 0; i < 150; i++) {
+    const it = B.makeItem(skill, level, rng);
+    let ans;
+    if (it.type === 'fracDec') ans = it.data.value;
+    else if (it.type === 'decFrac') ans = { w: it.data.whole || null, n: it.data.n, d: it.data.d };
+    else if (it.type === 'expanded') ans = it.data.parts.map((p) => it.data.chips.find((c) => c.key === p.key).id);
+    else ans = it.data.result;
+    assert.equal(B.checkItem(it, ans).ok, true, `${it.key} L${level}`);
+    assert.ok(it.hint && it.explain, 'hint + explain exist');
+    if (it.type === 'calc') assert.ok(parseFloat(it.data.result) >= 0 && it.data.result.length <= 7);
+    if (it.type === 'fracDec') assert.ok(it.data.value.length <= 7);
+    if (it.type === 'expanded') {
+      assert.equal(new Set(it.data.chips.map((c) => c.key)).size, it.data.chips.length, 'no duplicate chips');
+      assert.ok(it.data.parts.length >= 2 && it.data.parts.length <= 5);
+    }
+  }
+});
+
+test('bridge: fracDec diagnoses', () => {
+  const it = { type: 'fracDec', data: { n: 45, d: 1000, value: '0.045', bridge: null }, feedback: { place: 'P', wrong: 'W', raw: 'R' } };
+  assert.equal(B.checkItem(it, '0.045').ok, true);
+  assert.equal(B.checkItem(it, '0.0450').ok, true);
+  assert.equal(B.checkItem(it, '0.45').code, 'place');
+  assert.equal(B.checkItem(it, '4.5').code, 'place');
+  assert.equal(B.checkItem(it, '0.5').code, 'wrong');
+  const l3 = { type: 'fracDec', data: { n: 3, d: 20, value: '0.15', bridge: { D: 100, k: 5, n2: 15 } }, feedback: { place: 'P', wrong: 'W', raw: 'R' } };
+  assert.equal(B.checkItem(l3, '0.3').code, 'raw');
+  assert.equal(B.checkItem(l3, '1.5').code, 'place');
+});
+
+test('bridge: decFrac needs the simplest form, accepts improper for mixed numbers', () => {
+  const half = { type: 'decFrac', data: { whole: 13, n: 1, d: 2, n0: 50, d0: 100 }, feedback: {} };
+  assert.equal(B.checkItem(half, { w: 13, n: 1, d: 2 }).ok, true);
+  assert.equal(B.checkItem(half, { w: null, n: 27, d: 2 }).ok, true);
+  assert.equal(B.checkItem(half, { w: 13, n: 50, d: 100 }).code, 'reduce');
+  assert.equal(B.checkItem(half, { w: 12, n: 3, d: 2 }).code, 'mixedForm');
+  assert.equal(B.checkItem(half, { w: 13, n: 2, d: 1 }).code, 'flip');
+  const q = { type: 'decFrac', data: { whole: 0, n: 1, d: 4, n0: 25, d0: 100 }, feedback: {} };
+  assert.equal(B.checkItem(q, { w: null, n: 4, d: 1 }).code, 'flip');
+  assert.equal(B.checkItem(q, { w: null, n: 25, d: 10 }).code, 'den');
+  assert.equal(B.checkItem(q, { w: null, n: null, d: 4 }).ok, false);
+});
+
+test('bridge: expanded form diagnoses order and place mistakes', () => {
+  const rng = mulberry32(3);
+  let it;
+  do { it = B.makeItem('expanded', 2, rng); } while (it.data.parts.length < 3);
+  const id = (key) => it.data.chips.find((c) => c.key === key).id;
+  const good = it.data.parts.map((p) => id(p.key));
+  assert.equal(B.checkItem(it, good).ok, true);
+  assert.equal(B.checkItem(it, [...good].reverse()).code, 'order');
+  const decoy = it.data.chips.find((c) => !it.data.parts.some((p) => p.key === c.key));
+  assert.notEqual(B.checkItem(it, [decoy.id, ...good.slice(1)]).ok, true);
+});
+
+test('bridge: calc diagnoses the classic misalignment', () => {
+  const rng = mulberry32(11);
+  const it = { type: 'calc', data: { a: '2', b: '0.3', op: '+', result: '2.3', mis: '5' }, feedback: {} };
+  assert.equal(B.checkItem(it, '2.3').ok, true);
+  assert.equal(B.checkItem(it, '5').code, 'align');
+  assert.equal(B.checkItem(it, '0.5').code, 'align');
+  assert.equal(B.checkItem(it, '23').code, 'point');
+  const col = { type: 'calc', data: { a: '7', b: '2.354', op: '-', result: '4.646', mis: null }, feedback: {} };
+  assert.equal(B.checkItem(col, '4.646').ok, true);
+  assert.equal(B.checkItem(col, '46.46').code, 'point');
+  void rng;
+});
+
+test('bridge: session reaches level 3, stays finite, perfect = 3 stars', () => {
+  const rng = mulberry32(5);
+  const s = newSession(S2);
+  const seen = new Set();
+  while (!isDone(s)) {
+    const it = nextItem(s, rng);
+    seen.add(`${it.skill}${it.level}`);
+    record(s, it, 1);
+  }
+  assert.equal(s.history.length, SESSION_LEN);
+  assert.equal(summary(s).stars, 3);
+  for (const k of S2.skills) assert.ok(seen.has(`${k}3`), `${k} reaches level 3`);
+  const w = newSession(S2);
+  const r2 = mulberry32(9);
+  while (!isDone(w)) record(w, nextItem(w, r2), 0);
+  assert.ok(w.history.length <= SESSION_LEN + MAX_EXTRA);
+  assert.equal(summary(w).stars, 1);
+});
+
+test('bridge: sample items read well in Persian text (no raw "0 خانه"-style gaps)', () => {
+  const rng = mulberry32(21);
+  for (const skill of B.SKILLS) for (const level of [1, 2, 3]) {
+    const it = B.makeItem(skill, level, rng);
+    for (const t of [it.hint, it.explain, ...Object.values(it.feedback)]) {
+      assert.ok(!/undefined|NaN|null/.test(t), `${it.key}: ${t}`);
+    }
+  }
+});

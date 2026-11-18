@@ -4,7 +4,8 @@ import { Chest, Coin, Medal, Star, Play } from '../components/Icons.jsx';
 import { CoinChip, GearButton, Num } from '../components/ui.jsx';
 import { CATEGORIES } from '../data/avatarItems.js';
 import { levelInfo } from '../data/levels.js';
-import { WORLDS } from '../data/worlds.js';
+import { WORLDS, continueStageId } from '../data/worlds.js';
+import { stageDef } from '../stages/defs.js';
 import { faNum } from '../lib/fa.js';
 import { useGame } from '../lib/game.jsx';
 import { jalaliLabel } from '../lib/jalali.js';
@@ -23,7 +24,8 @@ export default function Home({ go, openSettings }) {
   const { state, dispatch } = useGame();
   const { level, into, span } = levelInfo(state.xp);
   const jl = jalaliLabel();
-  const st = state.stages['ch3-1'];
+  const cur = stageDef(continueStageId(state.stages));
+  const st = state.stages[cur.id];
   const stars = st?.bestStars || 0;
   const nu = nextUnlock(level);
   const special = state.stages[SPECIAL.stage];
@@ -69,9 +71,9 @@ export default function Home({ go, openSettings }) {
             </div>
             <div className="txt-block">
               <div style={{ fontSize: 17, fontWeight: 800, opacity: 0.95 }}>{world.fa} · فصل <Num v={3} /></div>
-              <div style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.25, textShadow: '0 3px 10px rgba(20,16,46,.5)' }}>فانوس‌های ممیز</div>
-              <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 10, textShadow: '0 2px 8px rgba(20,16,46,.5)' }}>ارزش مکانی و مدل اعداد اعشاری</div>
-              <button className="btn btn-yellow btn-lg" onClick={() => go('stage', { stageId: 'ch3-1' })}>
+              <div style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.25, textShadow: '0 3px 10px rgba(20,16,46,.5)' }}>{cur.title}</div>
+              <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 10, textShadow: '0 2px 8px rgba(20,16,46,.5)' }}>{cur.sub}</div>
+              <button className="btn btn-yellow btn-lg" onClick={() => go('stage', { stageId: cur.id })}>
                 <Play width="28" height="28" /> {st?.plays ? 'ادامه‌ی ماجراجویی' : 'شروع مرحله'}
               </button>
             </div>

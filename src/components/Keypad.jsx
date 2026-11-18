@@ -21,18 +21,18 @@ export function AnswerField({ value, label, state = 'idle' }) {
   );
 }
 
-export default function Keypad({ onKey, disabled = false }) {
+export default function Keypad({ onKey, disabled = false, point = true, extra = null }) {
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'del'];
   return (
     <div className="keypad" dir="ltr">
-      {keys.map((k) => (
+      {keys.map((k) => (k === '.' && !point ? (extra ? <button key={k} className="key alt next" disabled={disabled} onClick={extra.onClick}>{extra.label}</button> : <span key={k} />) : (
         <button
           key={k} className={`key ${k === '.' || k === 'del' ? 'alt' : ''}`} disabled={disabled}
           onClick={() => onKey(k)} aria-label={k === '.' ? 'ممیز' : k === 'del' ? 'پاک کردن' : faNum(k)}
         >
           {k === 'del' ? <Backspace width="30" height="26" /> : k === '.' ? <span style={{ fontSize: 34, lineHeight: 1 }}>/</span> : faNum(k)}
         </button>
-      ))}
+      )))}
     </div>
   );
 }

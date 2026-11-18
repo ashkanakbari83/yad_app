@@ -41,7 +41,7 @@ export const WORLDS = [
     theme: { a: '#3B1F7A', b: '#B565E8', accent: '#FFC857', glow: '#FFE7A8' },
     nodes: [
       { id: 'ch3-1', fa: 'فانوس‌های ممیز', pages: '۴۴', ready: true, stageId: 'ch3-1' },
-      { id: 'ch3-2', fa: 'پل کسر و اعشار', pages: '۴۵–۴۶' },
+      { id: 'ch3-2', fa: 'پل کسر و اعشار', pages: '۴۵–۴۶', ready: true, stageId: 'ch3-2' },
       { id: 'ch3-3', fa: 'دروازه‌ی مقایسه', pages: '۴۷' },
       { id: 'ch3-4', fa: 'ضرب و جابه‌جایی ممیز', pages: '۴۸–۵۱' },
       { id: 'ch3-5', fa: 'تقسیم ده‌تایی', pages: '۵۲–۵۵' },
@@ -53,3 +53,12 @@ export const WORLDS = [
 
 export const worldById = (id) => WORLDS.find((w) => w.id === id);
 export const firstReadyStage = () => 'ch3-1';
+
+/** The stage the "continue" button on the home screen should open: the first ready stage that has
+ *  not been played yet, otherwise the ready stage with the fewest stars (so progress is always visible). */
+export function continueStageId(stages = {}) {
+  const ready = WORLDS.flatMap((w) => w.nodes).filter((n) => n.ready);
+  const fresh = ready.find((n) => !stages[n.stageId]?.plays);
+  if (fresh) return fresh.stageId;
+  return ready.reduce((best, n) => ((stages[n.stageId]?.bestStars || 0) < (stages[best.stageId]?.bestStars || 0) ? n : best), ready[0]).stageId;
+}

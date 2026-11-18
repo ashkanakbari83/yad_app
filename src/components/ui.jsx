@@ -51,12 +51,14 @@ export function Toast({ msg, onDone }) {
 }
 
 export function useWindowSize() {
-  const [size, setSize] = useState({ w: window.innerWidth, h: window.innerHeight });
+  const read = () => ({ w: window.innerWidth, h: window.innerHeight });
+  const [size, setSize] = useState(read);
   useLayoutEffect(() => {
-    const f = () => setSize({ w: window.innerWidth, h: window.innerHeight });
+    const f = () => setSize(read());
     window.addEventListener('resize', f);
+    const t = setTimeout(f, 350); // mobile browsers settle the viewport after launch / rotation
     window.addEventListener('orientationchange', f);
-    return () => { window.removeEventListener('resize', f); window.removeEventListener('orientationchange', f); };
+    return () => { clearTimeout(t); window.removeEventListener('resize', f); window.removeEventListener('orientationchange', f); };
   }, []);
   return size;
 }
