@@ -1,0 +1,49 @@
+:root {
+  /* brand */
+  --ink: #1f2350;
+  --ink-2: #565b94;
+  --ink-3: #8b90bd;
+  --paper: #ffffff;
+  --paper-2: #f4f2ff;
+  --paper-3: #e7e4ff;
+  --blue: #4c6fff;
+  --blue-d: #3550d6;
+  --purple: #7b5cff;
+  --purple-d: #5a3de0;
+  --mint: #2fd9a8;
+  --mint-d: #17ab82;
+  --yellow: #ffc93c;
+  --yellow-d: #e0a200;
+  --pink: #ff7eb6;
+  --orange: #ff9b54;
+  --red: #ff6b6b;
+  --red-d: #d94848;
+  --green: #35c57a;
+  --green-d: #1f9a5b;
+
+  /* shape + depth */
+  --r-xl: 28px;
+  --r-lg: 22px;
+  --r-md: 16px;
+  --r-sm: 10px;
+  --lip: 0 5px 0;
+  --shadow-1: 0 4px 0 rgba(20, 16, 46, 0.14), 0 10px 22px rgba(20, 16, 46, 0.2);
+  --shadow-2: 0 2px 0 rgba(20, 16, 46, 0.1), 0 6px 14px rgba(20, 16, 46, 0.16);
+
+  /* per-world theme (overridden by [data-world]) */
+  --w-a: #3b1f7a;
+  --w-b: #b565e8;
+  --w-accent: #ffc857;
+  --w-glow: #ffe7a8;
+
+  /* decimal model colors */
+  --model: #3ddcb0;
+  --model-d: #17ab82;
+  --model-2: #ffcf4a;
+  --model-off: #eceaff;
+
+  --font: 'Vazirmatn Variable', 'Vazirmatn', Tahoma, system-ui, sans-serif;
+}
+[data-world='ch1'] { --w-a: #2b3a8f; --w-b: #6c8cff; --w-accent: #7be0ff; --w-glow: #c7f2ff; }
+[data-world='ch2'] { --w-a: #12806f; --w-b: #8ee6b8; --w-accent: #ffd24d; --w-glow: #fff3b8; }
+[data-world='ch3'] { --w-a: #3b1f7a; --w-b: #b565e8; --w-accent: #ffc857; --w-glow: #ffe7a8; }
