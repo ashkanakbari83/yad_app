@@ -6,7 +6,7 @@
 .bottom { position: absolute; z-index: 3; left: 24px; right: 24px; bottom: 8px; height: 100px; display: flex; align-items: center; gap: 12px; }
 .bottom .say { flex: 1; min-width: 0; display: flex; align-items: center; }
 .bottom .actions { display: flex; gap: 10px; align-items: center; flex: none; }
-.bottom .bubble { font-size: 16px; line-height: 1.5; max-width: 620px; padding: 8px 14px; font-weight: 600; }
+.bottom .bubble { font-size: 17px; line-height: 1.5; max-width: 640px; padding: 8px 14px; font-weight: 600; }
 .bottom .actions .btn-lg { padding: 0 28px; font-size: 24px; }
 .bubble.good { background: #d9f8e8; border: 3px solid var(--green); }
 .bubble.good::after { background: #d9f8e8; }
@@ -254,3 +254,32 @@
 .person.me i { background: #ffc933; box-shadow: 0 0 0 3px #f0a500; height: 24px; }
 .person.before i { background: #38d6c4; } .person.after i { background: #ff8ac0; }
 .ls-stage { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+/* ===== learning: lesson page, task strip, brief ===== */
+.substep { margin-inline-start: 10px; font-size: 14px; font-weight: 800; background: rgba(255, 255, 255, 0.22); border-radius: 999px; padding: 2px 10px; vertical-align: middle; }
+.teach { flex: none; display: flex; align-items: center; gap: 10px; background: #eef0ff; border: 2px solid #cfd4ff; border-radius: 14px; padding: 6px 12px; font-size: 17px; line-height: 1.5; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.teach-tag { flex: none; background: var(--purple); color: #fff; font-size: 13px; font-weight: 900; border-radius: 999px; padding: 2px 10px; }
+.learn-body { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+.learn-body > .ls { height: 100%; }
+
+.lesson { display: flex; gap: 22px; align-items: stretch; height: 100%; }
+.lesson-main { flex: 1.35; display: flex; flex-direction: column; justify-content: center; gap: 10px; min-width: 0; }
+.lesson-kicker { font-size: 15px; font-weight: 900; color: var(--purple-d); letter-spacing: 0; }
+.lesson-head { margin: 0; font-size: 28px; line-height: 1.5; font-weight: 900; color: var(--ink); }
+.lesson-points { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.lesson-points li { position: relative; padding-inline-start: 26px; font-size: 21px; line-height: 1.65; font-weight: 600; color: var(--ink); }
+.lesson-points li::before { content: ''; position: absolute; inset-inline-start: 4px; top: 0.68em; width: 11px; height: 11px; border-radius: 50%; background: var(--yellow); border: 2px solid var(--yellow-d); }
+.lesson-ex { flex: 1; background: var(--paper-2); border: 3px dashed #bdb6f2; border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; justify-content: center; gap: 14px; min-width: 0; }
+.lesson-tag { align-self: flex-start; background: var(--purple); color: #fff; font-size: 14px; font-weight: 900; border-radius: 999px; padding: 2px 12px; }
+.lesson-cap { font-size: 16px; font-weight: 700; color: var(--ink-2); margin-bottom: 4px; }
+.lesson-math { font-size: 26px; font-weight: 900; color: var(--purple-d); line-height: 1.6; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+.brief { flex-direction: row; gap: 24px; align-items: stretch; padding: 20px 26px; }
+.brief-how, .brief-recap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; min-width: 0; }
+.brief-steps { margin: 0; padding-inline-start: 24px; display: flex; flex-direction: column; gap: 10px; font-size: 20px; line-height: 1.6; font-weight: 600; }
+.brief-steps li::marker { font-weight: 900; color: var(--purple-d); }
+.brief-meters { display: flex; gap: 8px; align-items: center; background: rgba(20, 16, 46, 0.12); border-radius: 16px; padding: 6px 12px; align-self: flex-start; }
+.brief-recap { background: var(--paper-2); border-radius: 20px; padding: 14px 18px; }
+.brief-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.brief-list li { font-size: 17px; line-height: 1.55; font-weight: 600; display: flex; flex-direction: column; }
+.brief-list li b { color: var(--purple-d); font-weight: 900; font-size: 16px; }

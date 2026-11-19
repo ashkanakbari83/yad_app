@@ -61,7 +61,7 @@ function PaintScene({ setSay, setReady }) {
   }, [count, step, setSay, setReady]);
   return (
     <div className="ls ls-paint">
-      <GridBoard value={g} onChange={setG} cell={26} />
+      <GridBoard value={g} onChange={setG} cell={22} />
       <div className="ls-side">
         <div className="goal">{step === 1 ? <>هدف: یک ستون کامل</> : <>هدف: <Num v="0.27" className="big" /></>}</div>
         <div className="readout">

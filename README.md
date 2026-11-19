@@ -31,10 +31,14 @@ src/screens/  Intro, Setup, Home, Map, Wardrobe, Stage, CardsGame, Settings, Lev
 tests/        logic.test.js
 ```
 
+## جریان یادگیری هر مرحله
+مقدمه ← برای هر درس: **صفحه‌ی «درس»** (متن آموزشی کوتاه + نمونه) ← **«خودت امتحان کن»** (متن مأموریت بالای کارت؛ بازخورد زنده در حباب پایین) ← **«قبل از تمرین»** (راهنمای بازی + یادآوری یک‌خطی هر مهارت) ← تمرین تطبیقی ← نتیجه.
+متن درس‌ها و یادآوری‌ها در `src/stages/lessons.js` است (`LESSONS[stageId][sceneId]` و `RECAPS[stageId][skill]`). برای مرحله‌ی جدید همین دو را هم پر کن.
+
 ## افزودن مرحله‌ی جدید
 1. در `data/worlds.js` گره را `ready: true` و `stageId` بده.
 2. یک فایل مثل `engine/bridge.js` بساز: `SKILLS`، `makeItem`، `checkItem`؛ هر نوع سؤال = `generate` + `check` + یک View (مثل `BridgeViews.jsx`، و یک `case` در `ItemViews.jsx`).
-3. مرحله را در `stages/defs.js` ثبت کن و درس‌ها را به `SCENES` در `screens/Stage.jsx` اضافه کن.
+3. مرحله را در `stages/defs.js` ثبت کن و درس‌ها را به `SCENES` در `screens/Stage.jsx` اضافه کن، متن‌شان را در `stages/lessons.js` بنویس.
 موتور تطبیقی (`session.js`) به نوع محتوا وابسته نیست و تعریف مرحله را می‌گیرد.
 در متن‌های بازخورد، کسر را به‌شکل `{۷|۱۰}` بنویس تا کسرِ عمودی نمایش داده شود و با ممیز («/») اشتباه نشود.
 

@@ -9,6 +9,7 @@ import { MULT_SCENES } from '../components/LearnMult.jsx';
 import { Close, Meter, Star, Medal } from '../components/Icons.jsx';
 import { CoinChip, Num } from '../components/ui.jsx';
 import { stageDef } from '../stages/defs.js';
+import { LESSONS, RECAPS } from '../stages/lessons.js';
 import { isDone, newSession, nextItem, record, summary, target } from '../engine/session.js';
 import { rich } from '../components/rich.jsx';
 import { useGame } from '../lib/game.jsx';
@@ -75,25 +76,108 @@ function Intro({ def, learned, onLearn, onPractice, onClose }) {
   );
 }
 
-/* ---------- learning scenes ---------- */
+/* ---------- learning scenes ----------
+   Every scene has two steps: a short written lesson first (what to know), then the hands-on scene.
+   The scene's first message is its task and stays visible on top of the card; later messages are live
+   feedback in the speech bubble. */
+function Lesson({ lesson, n }) {
+  return (
+    <div className="lesson">
+      <div className="lesson-main">
+        <div className="lesson-kicker">درس <Num v={n} /></div>
+        <h2 className="lesson-head">{rich(lesson.head)}</h2>
+        <ul className="lesson-points">{lesson.points.map((p, i) => <li key={i}>{rich(p)}</li>)}</ul>
+      </div>
+      <div className="lesson-ex">
+        <div className="lesson-tag">نمونه</div>
+        {lesson.example.map((e, i) => (
+          <div key={i} className="lesson-eg">
+            <div className="lesson-cap">{rich(e.t)}</div>
+            <div className="lesson-math" dir="ltr">{rich(e.m)}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Learn({ def, onDone, onClose }) {
   const scenes = SCENES[def.id];
   const [i, setI] = useState(0);
+  const [step, setStep] = useState('lesson'); // 'lesson' | 'try'
+  const [task, setTask] = useState('');
   const [say, setSay] = useState('');
   const [ready, setReady] = useState(false);
+  const taskRef = useRef('');
   const scene = scenes[i];
   const Comp = scene.Comp;
+  const lesson = LESSONS[def.id]?.[scene.id];
   const last = i === scenes.length - 1;
-  const stableSay = useCallback((t) => setSay(t), []);
+  const stableSay = useCallback((t) => {
+    if (!taskRef.current) { taskRef.current = t; setTask(t); } else if (t !== taskRef.current) setSay(t);
+  }, []);
   const stableReady = useCallback((v) => setReady(v), []);
+  const toTry = () => { taskRef.current = ''; setTask(''); setSay(''); setReady(false); setStep('try'); };
+  const next = () => {
+    if (last) { onDone(); return; }
+    setI(i + 1); setReady(false); setSay(''); setTask(''); taskRef.current = '';
+    setStep(LESSONS[def.id]?.[scenes[i + 1].id] ? 'lesson' : 'try');
+  };
+  const inLesson = step === 'lesson' && lesson;
   return (
     <div className="screen" data-world={def.world}>
       <div className="world-bg"><Scene world={def.world} dim /></div>
-      <TopBar title={<>آموزش <Num v={i + 1} /> از <Num v={scenes.length} /> · {scene.title}</>} onClose={onClose} />
-      <div className="stage-card card layer"><Comp key={scene.id} setSay={stableSay} setReady={stableReady} /></div>
+      <TopBar title={<>آموزش <Num v={i + 1} /> از <Num v={scenes.length} /> · {scene.title}<span className="substep">{inLesson ? 'درس' : 'خودت امتحان کن'}</span></>} onClose={onClose} />
+      <div className="stage-card card layer">
+        {inLesson ? <Lesson lesson={lesson} n={i + 1} /> : (
+          <>
+            {task && <div className="teach"><span className="teach-tag">کار تو</span><span>{rich(task)}</span></div>}
+            <div className="learn-body"><Comp key={scene.id} setSay={stableSay} setReady={stableReady} /></div>
+          </>
+        )}
+      </div>
       <Bottom
-        mood={ready ? 'happy' : 'idle'} say={rich(say)} tone={ready ? 'good' : ''}
-        action={<button className="btn btn-green btn-lg" disabled={!ready} onClick={() => { if (last) onDone(); else { setI(i + 1); setReady(false); setSay(''); } }}>{last ? 'شروع تمرین' : 'ادامه'}</button>}
+        mood={ready ? 'happy' : 'idle'} say={inLesson ? null : rich(say)} tone={ready ? 'good' : ''}
+        action={inLesson
+          ? <button className="btn btn-yellow btn-lg" onClick={toTry}>فهمیدم، امتحان کنم</button>
+          : <button className="btn btn-green btn-lg" disabled={!ready} onClick={next}>ادامه</button>}
+      />
+    </div>
+  );
+}
+
+/* ---------- before practice: how to play + recap ---------- */
+function Brief({ def, onStart, onBack, onClose }) {
+  const recap = RECAPS[def.id] || {};
+  return (
+    <div className="screen" data-world={def.world}>
+      <div className="world-bg"><Scene world={def.world} dim /></div>
+      <TopBar title="قبل از تمرین" onClose={onClose} />
+      <div className="stage-card card layer brief">
+        <div className="brief-how">
+          <div className="lesson-kicker">چطور بازی می‌کنیم</div>
+          <ol className="brief-steps">
+            <li>هر سؤال را حل کن و «بررسی» را بزن.</li>
+            <li>اگر درست نبود، راهنما می‌آید و یک بار دیگر فرصت داری.</li>
+            <li>هر پاسخ درست، نشانگر آن مهارت را پرتر می‌کند. هدف: پر کردن هر چهار نشانگر.</li>
+          </ol>
+          <div className="brief-meters">
+            {def.skills.map((k, i) => <span key={k}><Meter kind={def.meter} id={`b${i}`} level={0} size={34} /></span>)}
+          </div>
+        </div>
+        <div className="brief-recap">
+          <div className="lesson-kicker">یادآوری سریع</div>
+          <ul className="brief-list">
+            {def.skills.map((k) => <li key={k}><b>{def.meta[k].fa}</b>{rich(recap[k] || '')}</li>)}
+          </ul>
+        </div>
+      </div>
+      <Bottom
+        mood="idle"
+        action={<>
+          <button className="btn btn-white" onClick={onBack}>مرور درس‌ها</button>
+          <button className="btn btn-green btn-lg" onClick={onStart}>شروع تمرین</button>
+        </>}
       />
     </div>
   );
@@ -256,7 +340,8 @@ export default function StageRunner({ stageId, onExit, onMap, onReplay, skipLear
 
   switch (phase) {
     case 'intro': return <Intro def={def} learned={!!saved?.learned} onLearn={() => setPhase('learn')} onPractice={() => setPhase('practice')} onClose={onExit} />;
-    case 'learn': return <Learn def={def} onDone={() => { dispatch({ type: 'learned', stageId }); setPhase('practice'); }} onClose={onExit} />;
+    case 'learn': return <Learn def={def} onDone={() => { dispatch({ type: 'learned', stageId }); setPhase('brief'); }} onClose={onExit} />;
+    case 'brief': return <Brief def={def} onStart={() => setPhase('practice')} onBack={() => setPhase('learn')} onClose={onExit} />;
     case 'practice': return <Practice def={def} stageId={stageId} onFinish={finish} onClose={onExit} />;
     case 'cards': return <CardsGame onDone={cardsDone} onClose={() => setPhase('result')} />;
     case 'result': return <Result def={def} res={res} learnedCards={!!saved?.cards || false} onCards={() => setPhase('cards')} onReplay={onReplay} onMap={onMap} onHome={onExit} />;
