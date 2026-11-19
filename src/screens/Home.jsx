@@ -30,11 +30,11 @@ export default function Home({ go, openSettings }) {
   const nu = nextUnlock(level);
   const special = state.stages[SPECIAL.stage];
   const specialReady = !!special && special.bestStars >= SPECIAL.stars;
-  const world = WORLDS.find((w) => w.id === 'ch3');
+  const world = WORLDS.find((w) => w.id === cur.world);
 
   return (
-    <div className="screen home" data-world="ch3">
-      <div className="world-bg"><Scene world="ch3" dim /></div>
+    <div className="screen home" data-world={cur.world}>
+      <div className="world-bg"><Scene world={cur.world} dim /></div>
       <div className="topbar layer">
         <GearButton onClick={openSettings} />
         <div className="title on-world">
@@ -65,12 +65,12 @@ export default function Home({ go, openSettings }) {
         {/* center: continue + navigation */}
         <div className="center-col">
           <div className="card continue-card">
-            <div className="scene"><Scene world="ch3" /></div>
+            <div className="scene"><Scene world={cur.world} /></div>
             <div style={{ position: 'absolute', top: 16, left: 20, display: 'flex', gap: 4, zIndex: 3 }}>
               {[1, 2, 3].map((i) => <Star key={i} on={i <= stars} width="34" height="34" />)}
             </div>
             <div className="txt-block">
-              <div style={{ fontSize: 17, fontWeight: 800, opacity: 0.95 }}>{world.fa} · فصل <Num v={3} /></div>
+              <div style={{ fontSize: 17, fontWeight: 800, opacity: 0.95 }}>{world.fa} · فصل <Num v={world.chapter} /></div>
               <div style={{ fontSize: 34, fontWeight: 900, lineHeight: 1.25, textShadow: '0 3px 10px rgba(20,16,46,.5)' }}>{cur.title}</div>
               <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 10, textShadow: '0 2px 8px rgba(20,16,46,.5)' }}>{cur.sub}</div>
               <button className="btn btn-yellow btn-lg" onClick={() => go('stage', { stageId: cur.id })}>

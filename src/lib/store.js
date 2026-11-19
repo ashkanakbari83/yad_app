@@ -11,7 +11,7 @@ export const MISSION_DEFS = {
 export const SPECIAL = {
   id: 'special',
   fa: 'مرحله‌ی «فانوس‌های ممیز» را با ۲ ستاره یا بیشتر تمام کن',
-  stage: 'ch3-1',
+  stage: 'ch1-1',
   stars: 2,
   xp: 40,
   coins: 40,
@@ -36,7 +36,7 @@ export const initialState = () => ({
   missions: { day: '', list: [] },
   specialClaimed: false,
   settings: { reduceMotion: false },
-  lastWorld: 'ch3',
+  lastWorld: 'ch1',
 });
 
 export function loadState() {

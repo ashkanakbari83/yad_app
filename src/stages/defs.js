@@ -1,10 +1,28 @@
 // Pure stage definitions (no JSX) so the engine and the tests can use them directly.
 import * as first from '../engine/items.js';
 import * as bridge from '../engine/bridge.js';
+import * as eo from '../engine/evenodd.js';
 
 const mastered = (min) => (sum) => Object.values(sum.mastery).every((m) => m >= min);
 
 export const STAGES = {
+  'ch1-1': {
+    id: 'ch1-1',
+    world: 'ch1',
+    title: 'تونل‌های زوج و فرد',
+    sub: 'الگوهای عددی، زوج و فرد',
+    pages: '۲–۴',
+    meter: 'crystal',
+    skills: eo.SKILLS,
+    meta: eo.SKILL_META,
+    warmup: eo.WARMUP,
+    makeItem: eo.makeItem,
+    checkItem: eo.checkItem,
+    hasCards: false,
+    story: (name) => `سلام ${name}! من «ممیزک» هستم و به دره‌ی کریستال‌ها خوش آمدی. تونل‌های دره خاموش شده‌اند! هر کریستال یک مهارت است. چهار کریستال را با تمرین روشن کن.`,
+    resultLine: ['شروع خوبی بود! با یک دور تمرین کریستال‌ها روشن‌تر می‌شوند.', 'کریستال‌ها تقریباً روشن شدند. یک دور دیگر کاملشان می‌کند.', 'همه‌ی کریستال‌ها روشن شد! تونل‌ها می‌درخشند.'],
+    extraMedals: () => [],
+  },
   'ch3-1': {
     id: 'ch3-1',
     world: 'ch3',

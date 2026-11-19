@@ -10,8 +10,8 @@ export default function Setup({ onDone }) {
   const [av, setAv] = useState({ ...DEFAULT_AVATAR });
   const ok = name.trim().length >= 1;
   return (
-    <div className="screen setup" data-world="ch3">
-      <div className="world-bg"><Scene world="ch3" dim /></div>
+    <div className="screen setup" data-world="ch1">
+      <div className="world-bg"><Scene world="ch1" dim /></div>
       <div className="preview layer">
         <Avatar avatar={av} mood="happy" size={230} />
         <div className="chip" style={{ fontSize: 22, minWidth: 150, justifyContent: 'center' }}>{name.trim() || 'اسم شخصیتت'}</div>

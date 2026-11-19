@@ -189,3 +189,47 @@
 .ls .ptable .dchip { min-width: 56px; height: 52px; font-size: 28px; }
 .ls .pslot.sm { height: 62px; width: 76px; }
 .ugrid{flex:none}.df-row{gap:10px}
+
+/* ---------------------------------------------------------------- stage ch1-1 */
+.pairdots { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 440px; }
+.pd-pair { display: inline-flex; gap: 3px; padding: 4px 6px; border-radius: 12px; background: #e8f9f6; border: 2px solid #38d6c4; }
+.pd-pair.left { background: #fff6dd; border: 2px dashed #f0a500; }
+.pd-solo { display: inline-flex; padding: 4px; }
+.pd-dot { width: 18px; height: 18px; border-radius: 50%; display: inline-block; }
+.pd-dot.a { background: #1fb8a6; } .pd-dot.b { background: #f0a500; }
+.pairdots.lg .pd-dot { width: 26px; height: 26px; }
+.pairdots.xs { gap: 2px; max-width: 120px; } .pairdots.xs .pd-pair { padding: 1px 2px; border-width: 1px; } .pairdots.xs .pd-dot { width: 6px; height: 6px; }
+.sumdots, .route { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.op { font-size: 36px; font-weight: 900; color: var(--ink-3); }
+.tunnel { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 22px; background: linear-gradient(#cfd6f3, #aab3e2); border: 3px solid #7a85c9; min-width: 90px; }
+.tn-balls { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; max-width: 100px; }
+.ball { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 2px solid #3b2d8f; display: inline-block; }
+.tn-num { font-size: 24px; font-weight: 900; color: #3b2d8f; }
+.figs { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.fig-row { display: flex; gap: 22px; align-items: flex-end; min-height: 70px; }
+.fig-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.fig-lab { font-size: 15px; font-weight: 800; color: var(--ink-2); }
+.fig-table { display: flex; flex-direction: column; border-radius: 14px; overflow: hidden; border: 3px solid #cfc8f6; }
+.ft-row { display: flex; }
+.ft-row b, .ft-h { min-width: 60px; padding: 4px 10px; text-align: center; font-size: 24px; font-weight: 900; border-inline-start: 2px solid #cfc8f6; }
+.ft-h { font-size: 16px; background: #efeaff; min-width: 74px; color: var(--ink-2); }
+.ft-row.head { background: #f4f0ff; border-bottom: 2px solid #cfc8f6; }
+.ft-row b.q { color: var(--pink); }
+.hops { width: 560px; max-width: 100%; }
+.blanks { display: flex; align-items: center; gap: 6px; }
+.blank { min-width: 64px; height: 64px; display: inline-flex; align-items: center; justify-content: center; border-radius: 16px; background: #f4f0ff; border: 3px solid #cfc8f6; font-size: 30px; font-weight: 900; }
+.blank.q { border-style: dashed; color: var(--pink); } .blank.dots { border: 0; background: none; }
+.arrow { font-size: 17px; font-weight: 900; color: #1fb8a6; }
+.eo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; height: 100%; padding: 0 12px; text-align: center; }
+.eo-opts { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.eo-opt { min-width: 120px; min-height: 66px; padding: 8px 20px; border-radius: 18px; border: 4px solid #cfc8f6; background: #fff; font-size: 30px; font-weight: 900; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.eo-opts.long { flex-direction: column; align-items: stretch; }
+.eo-opts.long .eo-opt { font-size: 21px; min-height: 58px; padding: 6px 16px; }
+.eo-opt.sel { border-color: var(--purple); background: #efeaff; box-shadow: 0 0 0 4px rgba(123, 92, 255, 0.22); }
+.eo-opt.rev { border-color: var(--green); background: #e1fbee; }
+.ls-fig { min-height: 80px; display: flex; align-items: flex-end; justify-content: center; }
+.ls-fig.tall { min-height: 130px; }
+.ls-dots { min-height: 120px; display: flex; align-items: center; }
+.stepval { display: flex; flex-direction: column; align-items: center; min-width: 90px; }
+.badge { margin-inline-start: 14px; padding: 4px 18px; border-radius: 999px; font-size: 26px; font-weight: 900; color: #fff; }
+.badge.even { background: #1fb8a6; } .badge.odd { background: #f0a500; }

@@ -4,6 +4,7 @@ import Scene from '../components/Scene.jsx';
 import ItemView from '../components/ItemViews.jsx';
 import { LEARN_SCENES } from '../components/Learn.jsx';
 import { BRIDGE_SCENES } from '../components/LearnBridge.jsx';
+import { EVENODD_SCENES } from '../components/LearnEvenOdd.jsx';
 import { Close, Meter, Star, Medal } from '../components/Icons.jsx';
 import { CoinChip, Num } from '../components/ui.jsx';
 import { stageDef } from '../stages/defs.js';
@@ -14,7 +15,7 @@ import { mulberry32 } from '../lib/rng.js';
 import { MEDALS } from '../lib/store.js';
 import CardsGame from './CardsGame.jsx';
 
-const SCENES = { 'ch3-1': LEARN_SCENES, 'ch3-2': BRIDGE_SCENES };
+const SCENES = { 'ch1-1': EVENODD_SCENES, 'ch3-1': LEARN_SCENES, 'ch3-2': BRIDGE_SCENES };
 
 const PRAISE = ['آفرین!', 'عالی بود!', 'دقیقاً همین!', 'درست گفتی!', 'چه دقیق!', 'خیلی خوب!'];
 const PRAISE_RECOVER = ['دیدی؟ با دقت درست شد!', 'پشتکار داری! این بار درست شد.', 'عالی! اشتباه، راه یاد گرفتن است.'];
@@ -47,8 +48,8 @@ function Bottom({ mood, say, tone, action }) {
 function Intro({ def, learned, onLearn, onPractice, onClose }) {
   const { state } = useGame();
   return (
-    <div className="screen" data-world="ch3">
-      <div className="world-bg"><Scene world="ch3" /></div>
+    <div className="screen" data-world={def.world}>
+      <div className="world-bg"><Scene world={def.world} /></div>
       <TopBar title={def.title} onClose={onClose} />
       <div className="intro-body layer">
         <div className="card story">
@@ -85,8 +86,8 @@ function Learn({ def, onDone, onClose }) {
   const stableSay = useCallback((t) => setSay(t), []);
   const stableReady = useCallback((v) => setReady(v), []);
   return (
-    <div className="screen" data-world="ch3">
-      <div className="world-bg"><Scene world="ch3" dim /></div>
+    <div className="screen" data-world={def.world}>
+      <div className="world-bg"><Scene world={def.world} dim /></div>
       <TopBar title={<>آموزش <Num v={i + 1} /> از <Num v={scenes.length} /> · {scene.title}</>} onClose={onClose} />
       <div className="stage-card card layer"><Comp key={scene.id} setSay={stableSay} setReady={stableReady} /></div>
       <Bottom
@@ -161,8 +162,8 @@ function Practice({ def, stageId, onFinish, onClose }) {
   const done = s.asked;
   const label = resolved ? (isDone(s) ? 'پایان تمرین' : 'ادامه') : attempt > 0 ? 'دوباره بررسی' : 'بررسی';
   return (
-    <div className="screen" data-world="ch3">
-      <div className="world-bg"><Scene world="ch3" dim /></div>
+    <div className="screen" data-world={def.world}>
+      <div className="world-bg"><Scene world={def.world} dim /></div>
       <TopBar title="تمرین" onClose={onClose}>
         <div className="dots" aria-label={`سؤال ${done + (resolved ? 0 : 1)} از ${total}`}>
           {Array.from({ length: total }, (_, i) => <i key={i} className={i < done ? 'on' : i === done ? 'now' : ''} />)}
@@ -190,8 +191,8 @@ function Result({ def, res, learnedCards, onCards, onReplay, onMap, onHome }) {
   const line = def.resultLine[res.stars - 1];
   const { state } = useGame();
   return (
-    <div className="screen" data-world="ch3">
-      <div className="world-bg"><Scene world="ch3" /></div>
+    <div className="screen" data-world={def.world}>
+      <div className="world-bg"><Scene world={def.world} /></div>
       <div className="result layer">
         <div className="card rcard">
           <div className="stars-row">{[1, 2, 3].map((i) => <span key={i} className="pop" style={{ animationDelay: `${i * 0.18}s` }}><Star on={i <= res.stars} width="84" height="84" /></span>)}</div>

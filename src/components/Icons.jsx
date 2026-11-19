@@ -95,5 +95,19 @@ export function Plank({ level = 0, size = 44, id = 'p' }) {
   );
 }
 
+/** Crystal with a glow level 0..1 (mastery meter of chapter 1). */
+export function Crystal({ level = 0, size = 44, id = 'c' }) {
+  const lit = Math.max(0, Math.min(1, level));
+  return (
+    <svg viewBox="0 0 40 52" width={size * 0.8} height={size} aria-hidden>
+      <defs><linearGradient id={`cg${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#c7f2ff" /><stop offset="1" stopColor="#4cc9f0" /></linearGradient></defs>
+      {lit > 0.7 && <ellipse cx="20" cy="28" rx="19" ry="24" fill="#7be0ff" opacity="0.25" />}
+      <polygon points="20,3 34,18 28,48 12,48 6,18" fill="#3b3f87" stroke="#6a72d6" strokeWidth="2.5" strokeLinejoin="round" />
+      <polygon points="20,6 31,18 26,45 14,45 9,18" fill={`url(#cg${id})`} opacity={0.14 + 0.86 * lit} />
+      <path d="M20 6L16 18L20 45M9 18H31" stroke="#fff" strokeWidth="1.5" opacity={0.15 + 0.4 * lit} fill="none" />
+    </svg>
+  );
+}
+
 /** The mastery meter icon of a stage definition. */
-export const Meter = ({ kind, ...p }) => (kind === 'plank' ? <Plank {...p} /> : <Lantern {...p} />);
+export const Meter = ({ kind, ...p }) => (kind === 'plank' ? <Plank {...p} /> : kind === 'crystal' ? <Crystal {...p} /> : <Lantern {...p} />);

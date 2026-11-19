@@ -361,3 +361,68 @@ test('bridge: sample items read well in Persian text (no raw "0 خانه"-style 
     }
   }
 });
+
+/* ---------------------------------------------------------------- stage ch1-1: «تونل‌های زوج و فرد» */
+import * as E from '../src/engine/evenodd.js';
+const S0 = STAGES['ch1-1'];
+
+test('evenodd: every item is solvable, has hint/explain, options are unambiguous', () => {
+  const rng = mulberry32(13);
+  for (const skill of E.SKILLS) for (const level of [1, 2, 3]) for (let i = 0; i < 200; i++) {
+    const it = E.makeItem(skill, level, rng);
+    const ans = it.type === 'num' ? it.data.answer : it.data.answerIndex;
+    assert.equal(E.checkItem(it, ans).ok, true, it.key);
+    assert.ok(it.hint && it.explain && it.feedback.wrong);
+    for (const t of [it.hint, it.explain, ...Object.values(it.feedback), it.data.prompt]) assert.ok(!/undefined|NaN|null/.test(t), `${it.key}: ${t}`);
+    if (it.type === 'choice') {
+      assert.equal(new Set(it.data.options).size, it.data.options.length, `unique options ${it.key}`);
+      // exactly one option is right
+      const right = it.data.options.filter((_, k) => E.checkItem(it, k).ok);
+      assert.equal(right.length, 1);
+    }
+    if (it.skill === 'parity' && it.level >= 2) {
+      const wantEven = /زوج/.test(it.data.prompt) && !/فرق/.test(it.data.prompt);
+      if (/کدام عدد (زوج|فرد) است/.test(it.data.prompt)) {
+        const o = it.data.options;
+        const n = o.filter((x) => (x % 2 === 0) === wantEven).length;
+        assert.equal(n, 1, `exactly one ${it.data.prompt}`);
+      }
+    }
+  }
+});
+
+test('evenodd: book facts (2n wheels, 2n-1 squares, 3n sticks, parity of sums)', () => {
+  assert.equal(E.FAMILIES.wheel.f(10), 20);
+  assert.equal(E.FAMILIES.square.f(12), 23);
+  assert.equal(E.FAMILIES.stick.f(4), 12);
+  const rng = mulberry32(2);
+  for (let i = 0; i < 300; i++) {
+    const it = E.makeItem('sumParity', 3, rng);
+    const total = it.data.visual.tunnels.reduce((a, b) => a + b, 0);
+    assert.equal(it.data.answerIndex, total % 2 === 0 ? 0 : 1);
+  }
+  for (let i = 0; i < 300; i++) {
+    const it = E.makeItem('pattern', 3, rng);
+    const v = Number(/(\d+) (چرخ|مربع)/.exec(it.data.prompt)[1]);
+    const wheel = it.data.fam === 'wheel';
+    const possible = wheel ? v % 2 === 0 : v % 2 === 1;
+    assert.equal(/^بله/.test(it.data.options[it.data.answerIndex]), possible, it.key);
+  }
+});
+
+test('evenodd: traps are diagnosed and a session behaves', () => {
+  const it = { type: 'num', data: { answer: 23, traps: { 12: 'figNum', 24: 'offByOne' } }, feedback: { figNum: 'F', offByOne: 'O', wrong: 'W' } };
+  assert.equal(E.checkItem(it, 23).ok, true);
+  assert.equal(E.checkItem(it, 12).code, 'figNum');
+  assert.equal(E.checkItem(it, 24).code, 'offByOne');
+  assert.equal(E.checkItem(it, 5).code, 'wrong');
+  const rng = mulberry32(8);
+  const s = newSession(S0);
+  const levels = new Set();
+  while (!isDone(s)) { const x = nextItem(s, rng); levels.add(`${x.skill}${x.level}`); record(s, x, 1); }
+  assert.equal(summary(s).stars, 3);
+  for (const k of S0.skills) assert.ok(levels.has(`${k}3`));
+  const w = newSession(S0); const r2 = mulberry32(4);
+  while (!isDone(w)) record(w, nextItem(w, r2), 0);
+  assert.ok(w.history.length <= SESSION_LEN + MAX_EXTRA);
+});

@@ -1,3 +1,4 @@
+import { stageDef } from './stages/defs.js';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import Frame from './components/Frame.jsx';
 import { levelInfo } from './data/levels.js';
@@ -46,10 +47,10 @@ export default function App() {
     case 'map': screen = <WorldList go={go} onBack={() => go('home')} />; break;
     case 'world': screen = <WorldPath worldId={route.worldId} go={go} onBack={() => go('map')} />; break;
     case 'ward': screen = <Wardrobe onBack={() => go('home')} />; break;
-    case 'stage': screen = <StageRunner key={route.stageId + (route.run || 0)} stageId={route.stageId} onExit={() => go('home')} onMap={() => go('world', { worldId: 'ch3' })} onReplay={() => go('stage', { stageId: route.stageId, run: (route.run || 0) + 1, skipLearn: true })} skipLearn={route.skipLearn} onPhase={setStagePhase} />; break;
+    case 'stage': screen = <StageRunner key={route.stageId + (route.run || 0)} stageId={route.stageId} onExit={() => go('home')} onMap={() => go('world', { worldId: stageDef(route.stageId).world })} onReplay={() => go('stage', { stageId: route.stageId, run: (route.run || 0) + 1, skipLearn: true })} skipLearn={route.skipLearn} onPhase={setStagePhase} />; break;
     default: screen = <Intro onStart={home} />;
   }
-  const world = route.name === 'world' ? route.worldId : 'ch3';
+  const world = route.name === 'world' ? route.worldId : route.name === 'stage' ? stageDef(route.stageId).world : 'ch1';
   return (
     <GameCtx.Provider value={ctx}>
       <Frame world={world} reduceMotion={state.settings.reduceMotion}>

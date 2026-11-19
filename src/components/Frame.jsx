@@ -3,11 +3,15 @@ import { ScaleCtx, useWindowSize } from './ui.jsx';
 
 const W = 960;
 const H = 540;
+const MAX_W = 1300;
 
 /** Fixed 16:9 canvas, scaled to fit the window (landscape-first, phone friendly). */
 export default function Frame({ children, world, reduceMotion }) {
   const { w, h } = useWindowSize();
   const scale = Math.min(w / W, h / H);
+  // phones are wider than 16:9: keep the 960x540 game column centred and let backgrounds fill the extra width
+  const vw = Math.min(MAX_W, Math.max(W, w / scale));
+  const gx = (vw - W) / 2;
   const coarse = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
   const portrait = coarse && h > w;
   useEffect(() => {
@@ -15,7 +19,7 @@ export default function Frame({ children, world, reduceMotion }) {
   }, [reduceMotion]);
   return (
     <div className="viewport" data-world={world}>
-      <div className="frame" data-world={world} style={{ transform: `scale(${scale})`, left: (w - W * scale) / 2, top: (h - H * scale) / 2 }}>
+      <div className="frame" data-world={world} style={{ width: vw, '--gx': `${gx}px`, transform: `scale(${scale})`, left: (w - vw * scale) / 2, top: (h - H * scale) / 2 }}>
         <ScaleCtx.Provider value={scale}>{children}</ScaleCtx.Provider>
       </div>
       {portrait && (
