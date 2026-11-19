@@ -10,7 +10,7 @@ export const WORLDS = [
     theme: { a: '#2B3A8F', b: '#6C8CFF', accent: '#7BE0FF', glow: '#C7F2FF' },
     nodes: [
       { id: 'ch1-1', fa: 'تونل‌های زوج و فرد', pages: '۲–۴', ready: true, stageId: 'ch1-1' },
-      { id: 'ch1-2', fa: 'پل مضرب‌ها', pages: '۴–۶' },
+      { id: 'ch1-2', fa: 'پل مضرب‌ها', pages: '۴–۶', ready: true, stageId: 'ch1-2' },
       { id: 'ch1-3', fa: 'کوه عددهای بزرگ', pages: '۷–۱۰' },
       { id: 'ch1-4', fa: 'دروازه‌ی بخش‌پذیری', pages: '۱۱–۱۵' },
       { id: 'ch1-5', fa: 'قله‌ی یخی', pages: '۱۶–۱۹' },

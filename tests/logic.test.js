@@ -426,3 +426,63 @@ test('evenodd: traps are diagnosed and a session behaves', () => {
   while (!isDone(w)) record(w, nextItem(w, r2), 0);
   assert.ok(w.history.length <= SESSION_LEN + MAX_EXTRA);
 });
+
+/* ---------------------------------------------------------------- stage ch1-2: «پل مضرب‌ها» */
+import * as M from '../src/engine/multiples.js';
+const S12 = STAGES['ch1-2'];
+
+test('multiples: every item is solvable, unambiguous and readable', () => {
+  const rng = mulberry32(31);
+  for (const skill of M.SKILLS) for (const level of [1, 2, 3]) for (let i = 0; i < 250; i++) {
+    const it = M.makeItem(skill, level, rng);
+    let ans;
+    if (it.type === 'num') ans = it.data.answer;
+    else if (it.type === 'grid') ans = it.data.targets;
+    else ans = it.data.answerIndex;
+    assert.equal(M.checkItem(it, ans).ok, true, it.key);
+    for (const t of [it.hint, it.explain, ...Object.values(it.feedback), it.data.prompt]) assert.ok(t && !/undefined|NaN|null/.test(t), `${it.key}: ${t}`);
+    if (it.type === 'choice') {
+      assert.equal(new Set(it.data.options).size, it.data.options.length, `unique ${it.key}`);
+      assert.ok(it.data.options.length >= 3, `enough options ${it.key}`);
+      assert.equal(it.data.options.filter((_, k) => M.checkItem(it, k).ok).length, 1, `one right ${it.key}`);
+    }
+    if (it.skill === 'multiples' && it.level === 3 && it.type === 'choice') {
+      const o = it.data.options;
+      const m = /کدام عدد مضرب (\d+) است/.exec(it.data.prompt);
+      if (m) assert.equal(o.filter((x) => x % Number(m[1]) === 0).length, 1);
+      const m2 = /^(\d+) مضرب کدام عدد/.exec(it.data.prompt);
+      if (m2) assert.equal(o.filter((x) => Number(m2[1]) % x === 0).length, 1);
+    }
+  }
+});
+
+test('multiples: book facts and grid checking', () => {
+  assert.equal(M.isMultiple(55, 5), true);
+  assert.equal(55 / 5, 11); // "55 is which multiple of 5" = 11th
+  const rng = mulberry32(5);
+  let g;
+  do { g = M.makeItem('grid', 1, rng); } while (g.data.ks[0] !== 5);
+  assert.deepEqual(g.data.targets, [5, 10, 15, 20, 25, 30]);
+  assert.equal(M.checkItem(g, [5, 10, 15, 20, 25]).code, 'missing');
+  assert.equal(M.checkItem(g, [...g.data.targets, 7]).code, 'extra');
+  assert.equal(M.checkItem(g, [5, 7]).code, 'both');
+  let g3;
+  do { g3 = M.makeItem('grid', 3, rng); } while (g3.data.ks.join() !== '3,5');
+  assert.deepEqual(g3.data.both, [15, 30]);
+  // Fatima in a 31-person line is 16th (book p.6)
+  const lu = M.makeItem('lineUp', 1, rng);
+  const N = Number(/(\d+) نفره/.exec(lu.data.prompt)[1]);
+  assert.equal(lu.data.answer, (N + 1) / 2);
+});
+
+test('multiples: session reaches level 3 and stays finite', () => {
+  const rng = mulberry32(6);
+  const s = newSession(S12);
+  const lv = new Set();
+  while (!isDone(s)) { const x = nextItem(s, rng); lv.add(`${x.skill}${x.level}`); record(s, x, 1); }
+  assert.equal(summary(s).stars, 3);
+  for (const k of S12.skills) assert.ok(lv.has(`${k}3`), k);
+  const w = newSession(S12); const r2 = mulberry32(9);
+  while (!isDone(w)) record(w, nextItem(w, r2), 0);
+  assert.ok(w.history.length <= SESSION_LEN + MAX_EXTRA);
+});

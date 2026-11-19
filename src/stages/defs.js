@@ -2,6 +2,7 @@
 import * as first from '../engine/items.js';
 import * as bridge from '../engine/bridge.js';
 import * as eo from '../engine/evenodd.js';
+import * as mu from '../engine/multiples.js';
 
 const mastered = (min) => (sum) => Object.values(sum.mastery).every((m) => m >= min);
 
@@ -21,6 +22,23 @@ export const STAGES = {
     hasCards: false,
     story: (name) => `سلام ${name}! من «ممیزک» هستم و به دره‌ی کریستال‌ها خوش آمدی. تونل‌های دره خاموش شده‌اند! هر کریستال یک مهارت است. چهار کریستال را با تمرین روشن کن.`,
     resultLine: ['شروع خوبی بود! با یک دور تمرین کریستال‌ها روشن‌تر می‌شوند.', 'کریستال‌ها تقریباً روشن شدند. یک دور دیگر کاملشان می‌کند.', 'همه‌ی کریستال‌ها روشن شد! تونل‌ها می‌درخشند.'],
+    extraMedals: () => [],
+  },
+  'ch1-2': {
+    id: 'ch1-2',
+    world: 'ch1',
+    title: 'پل مضرب‌ها',
+    sub: 'مضرب‌ها، جدول و جایگاه در صف',
+    pages: '۴–۶',
+    meter: 'plank',
+    skills: mu.SKILLS,
+    meta: mu.SKILL_META,
+    warmup: mu.WARMUP,
+    makeItem: mu.makeItem,
+    checkItem: mu.checkItem,
+    hasCards: false,
+    story: (name) => `${name}، بین دو لبه‌ی دره پلی از تخته‌های نورانی بود که خاموش شده! هر تخته یک مهارت است. چهار تخته را محکم کن تا از پل بگذریم.`,
+    resultLine: ['شروع خوبی بود! با یک دور تمرین تخته‌ها محکم‌تر می‌شوند.', 'پل تقریباً آماده است. یک دور دیگر کاملش می‌کند.', 'همه‌ی تخته‌ها محکم شد! پل مضرب‌ها آماده است.'],
     extraMedals: () => [],
   },
   'ch3-1': {

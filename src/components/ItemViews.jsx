@@ -7,6 +7,7 @@ import { fromHundredths, toHundredths } from '../lib/decimal.js';
 import { slotLabel } from '../engine/items.js';
 import { Calc, DecFrac, Expanded, FracDec } from './BridgeViews.jsx';
 import { ChoiceView, NumView } from './EvenOddViews.jsx';
+import { GridView } from './MultViews.jsx';
 
 /* ---------------------------------------------------------------- place table */
 function PlaceTable({ item, hint, locked, reveal, onChange }) {
@@ -194,6 +195,7 @@ export default function ItemView(props) {
     case 'decFrac': return <DecFrac {...props} />;
     case 'expanded': return <Expanded {...props} />;
     case 'calc': return <Calc {...props} />;
+    case 'grid': return <GridView {...props} />;
     case 'num': return <NumView {...props} />;
     case 'choice': return <ChoiceView {...props} />;
     default: return null;

@@ -3,6 +3,7 @@ import { Fragment, useState } from 'react';
 import { Num } from './ui.jsx';
 import Keypad, { AnswerField, applyKey } from './Keypad.jsx';
 import { FAMILIES, isEven } from '../engine/evenodd.js';
+import { MULT_VISUALS } from './MultViews.jsx';
 
 /* ---------------------------------------------------------------- drawings */
 const COLORS = { a: '#38d6c4', b: '#ffc933' };
@@ -139,7 +140,10 @@ function Visual({ vis, help }) {
           {vis.terms.map((t) => <b key={t} className="blank"><Num v={t} /></b>)}<b className="blank dots">…</b>
         </div>
       );
-    default: return null;
+    default: {
+      const X = MULT_VISUALS[vis.kind];
+      return X ? <X vis={vis} help={help} /> : null;
+    }
   }
 }
 

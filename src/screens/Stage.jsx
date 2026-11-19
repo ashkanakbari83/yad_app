@@ -5,6 +5,7 @@ import ItemView from '../components/ItemViews.jsx';
 import { LEARN_SCENES } from '../components/Learn.jsx';
 import { BRIDGE_SCENES } from '../components/LearnBridge.jsx';
 import { EVENODD_SCENES } from '../components/LearnEvenOdd.jsx';
+import { MULT_SCENES } from '../components/LearnMult.jsx';
 import { Close, Meter, Star, Medal } from '../components/Icons.jsx';
 import { CoinChip, Num } from '../components/ui.jsx';
 import { stageDef } from '../stages/defs.js';
@@ -15,7 +16,7 @@ import { mulberry32 } from '../lib/rng.js';
 import { MEDALS } from '../lib/store.js';
 import CardsGame from './CardsGame.jsx';
 
-const SCENES = { 'ch1-1': EVENODD_SCENES, 'ch3-1': LEARN_SCENES, 'ch3-2': BRIDGE_SCENES };
+const SCENES = { 'ch1-1': EVENODD_SCENES, 'ch1-2': MULT_SCENES, 'ch3-1': LEARN_SCENES, 'ch3-2': BRIDGE_SCENES };
 
 const PRAISE = ['آفرین!', 'عالی بود!', 'دقیقاً همین!', 'درست گفتی!', 'چه دقیق!', 'خیلی خوب!'];
 const PRAISE_RECOVER = ['دیدی؟ با دقت درست شد!', 'پشتکار داری! این بار درست شد.', 'عالی! اشتباه، راه یاد گرفتن است.'];
